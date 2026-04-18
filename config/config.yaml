@@ -5,7 +5,7 @@ rss:
 models:
   proposer: "claude-opus-4-6"
   voter: "claude-sonnet-4-6"
-  summary: "claude-haiku-4-5-20251001"
+  summary: "claude-sonnet-4-6"
 
 output:
   reports_dir: "data/narrative/reports"

@@ -160,9 +160,12 @@ def main() -> None:
     # --- 生成摘要 ---
     print("正在生成叙事摘要...")
     run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    summary = generate_summary(revised, run_date, summary_model, summaries_dir)
-    print(f"叙事摘要已保存: {summaries_dir}/{run_date.replace('-', '')}.json")
-    print(f"\n本期摘要:\n{summary['text']}\n")
+    try:
+        summary = generate_summary(revised, run_date, summary_model, summaries_dir)
+        print(f"叙事摘要已保存: {summaries_dir}/{run_date.replace('-', '')}.json")
+        print(f"\n本期摘要:\n{summary['text']}\n")
+    except Exception as e:
+        print(f"[警告] 叙事摘要生成失败，报告已保存: {e}")
 
     # --- 清理 sessions ---
     deleted = cleanup_sessions(all_sids)

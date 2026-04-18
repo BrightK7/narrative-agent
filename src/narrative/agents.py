@@ -286,7 +286,7 @@ def generate_summary(
     summaries_dir: Path,
 ) -> dict:
     prompt = _SUMMARIZE_PROMPT.format(report=report[:6000])
-    text, sid = _claude(prompt, model=summary_model, timeout=60)
+    text, sid = _claude(prompt, model=summary_model, timeout=120)
     if sid:
         cleanup_sessions([sid])
 
