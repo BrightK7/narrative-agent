@@ -1,0 +1,18 @@
+{
+  "updated": "2026-01-01",
+  "holdings": {
+    "BTC": {
+      "type": "spot"
+    },
+    "ETH": {
+      "type": "spot + leverage",
+      "liquidation_price": 900,
+      "note": "杠杆仓位，高度关注"
+    }
+  },
+  "usdt_reserve": {
+    "amount": 5000,
+    "location": "理财赚息",
+    "note": "储备金，危机时注入"
+  }
+}

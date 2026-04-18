@@ -1,0 +1,18 @@
+rss:
+  feed_url: "https://www.bankless.com/feed"
+  max_articles: 10
+
+models:
+  proposer: "claude-opus-4-6"
+  voter: "claude-sonnet-4-6"
+  summary: "claude-haiku-4-5-20251001"
+
+output:
+  reports_dir: "data/narrative/reports"
+  summaries_dir: "data/narrative/summaries"
+  seen_articles_path: "data/narrative/seen_articles.json"
+  positions_file: "data/positions.json"  # 留空字符串则跳过持仓分析
+
+report:
+  title: "叙事分析报告"
+  disclaimer: "本报告经过多 Agent 审议生成，仅供参考，不构成投资建议。"
