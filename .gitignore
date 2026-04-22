@@ -9,3 +9,6 @@ data/narrative/seen_articles.json
 
 # 保留 positions 示例，忽略真实持仓
 data/positions.json
+
+.idea
+data/narrative/cron.log
