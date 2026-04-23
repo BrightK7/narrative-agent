@@ -4,12 +4,19 @@
   Round 2: N 个 Voter（不同 persona）并行给出批评意见
   Round 3: Proposer 根据批评修改，生成终稿
 
+支持多 Provider（统一通过 claude -p CLI 调用）：
+  - claude-*   → Anthropic 官方 API（消耗 Coding Plan 额度）
+  - kimi-*     → Kimi Code 兼容 API（消耗 Kimi 额度）
+
+模型名前缀决定底层 endpoint，同一脚本内可混合使用。
+
 所有 claude -p session ID 统一收集，由调用方统一清理。
 """
 from __future__ import annotations
 
 import glob
 import json
+import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
@@ -17,6 +24,9 @@ from pathlib import Path
 from typing import Any
 
 CLAUDE_DIR = Path.home() / ".claude" / "projects"
+
+# Kimi Code 兼容 Anthropic API 的 endpoint
+KIMI_BASE_URL = "https://api.kimi.com/coding/"
 
 
 # ---------------------------------------------------------------------------
@@ -38,11 +48,48 @@ def cleanup_sessions(session_ids: list[str]) -> int:
 
 
 # ---------------------------------------------------------------------------
-# 底层调用
+# Provider 路由
 # ---------------------------------------------------------------------------
 
-def _claude(prompt: str, model: str, timeout: int = 300) -> tuple[str, str]:
-    claude_bin = Path.home() / ".local" / "bin" / "claude"
+def _resolve_provider(model: str) -> str:
+    """根据模型名前缀判断 provider。"""
+    model_lower = model.lower()
+    if model_lower.startswith("claude-"):
+        return "claude"
+    if model_lower.startswith("kimi-"):
+        return "kimi"
+    # 默认 fallback，保持向后兼容
+    return "claude"
+
+
+# ---------------------------------------------------------------------------
+# 统一底层调用（通过 claude -p，根据 provider 切换 endpoint）
+# ---------------------------------------------------------------------------
+
+def _call_llm(prompt: str, model: str, timeout: int = 300) -> tuple[str, str]:
+    """统一调用入口。根据模型名自动选择 endpoint，全部通过 claude -p 执行。
+
+    返回 (text, session_id)。
+    """
+    provider = _resolve_provider(model)
+
+    # 构造环境变量：根据 provider 切换 API endpoint
+    env = os.environ.copy()
+    if provider == "kimi":
+        kimi_key = env.get("KIMI_API_KEY", "")
+        if not kimi_key:
+            raise RuntimeError(
+                "调用 Kimi 模型需要设置环境变量 KIMI_API_KEY"
+            )
+        env["ANTHROPIC_BASE_URL"] = KIMI_BASE_URL
+        env["ANTHROPIC_API_KEY"] = kimi_key
+    else:
+        # Claude：移除可能指向其他 provider 的 base_url 和 api_key，
+        # 让 claude -p 使用 Claude Code 内部认证（coding plan）
+        env.pop("ANTHROPIC_BASE_URL", None)
+        env.pop("ANTHROPIC_API_KEY", None)
+
+    claude_bin = Path("/opt/homebrew/bin/claude")
     cmd = [
         str(claude_bin), "-p", "-",
         "--model", model,
@@ -50,13 +97,15 @@ def _claude(prompt: str, model: str, timeout: int = 300) -> tuple[str, str]:
         "--dangerously-skip-permissions",
     ]
     result = subprocess.run(
-        cmd, input=prompt, capture_output=True, text=True, timeout=timeout,
+        cmd, input=prompt, capture_output=True, text=True,
+        timeout=timeout, env=env,
     )
     if result.returncode != 0:
         raise RuntimeError(
-            f"claude -p 失败 (rc={result.returncode}):\n"
-            f"stderr: {result.stderr[:300]}\n"
-            f"stdout: {result.stdout[:300]}"
+            f"claude -p 失败 (provider={provider}, model={model}, "
+            f"rc={result.returncode}):\n"
+            f"stderr: {result.stderr[:500]}\n"
+            f"stdout: {result.stdout[:500]}"
         )
 
     session_id = ""
@@ -153,7 +202,7 @@ def run_proposer_draft(
         positions=positions_text,
         articles=articles_text,
     )
-    return _claude(prompt, model=proposer_model, timeout=300)
+    return _call_llm(prompt, model=proposer_model, timeout=300)
 
 
 # ---------------------------------------------------------------------------
@@ -190,7 +239,7 @@ def _run_single_critique(
         f"文章摘要（供参考）：\n{articles_summary}\n\n"
         f"{_VOTER_CRITIQUE_TASK}"
     )
-    text, sid = _claude(prompt, model=voter_model, timeout=240)
+    text, sid = _call_llm(prompt, model=voter_model, timeout=240)
     return CritiqueResult(voter_id=voter_id, persona=persona_name,
                           critique=text, session_id=sid)
 
@@ -259,7 +308,7 @@ def run_proposer_revision(
         draft=draft,
         critiques_block=critique_sections,
     )
-    return _claude(prompt, model=proposer_model, timeout=300)
+    return _call_llm(prompt, model=proposer_model, timeout=300)
 
 
 # ---------------------------------------------------------------------------
@@ -286,7 +335,7 @@ def generate_summary(
     summaries_dir: Path,
 ) -> dict:
     prompt = _SUMMARIZE_PROMPT.format(report=report[:6000])
-    text, sid = _claude(prompt, model=summary_model, timeout=120)
+    text, sid = _call_llm(prompt, model=summary_model, timeout=120)
     if sid:
         cleanup_sessions([sid])
 

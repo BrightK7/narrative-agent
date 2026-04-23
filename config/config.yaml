@@ -3,9 +3,30 @@ rss:
   max_articles: 10
 
 models:
-  proposer: "claude-opus-4-6"
-  voter: "claude-sonnet-4-6"
-  summary: "claude-sonnet-4-6"
+  # 模型名前缀决定 provider，统一通过 claude -p CLI 调用：
+  #   claude-*  → Anthropic 官方 API（消耗 Coding Plan 额度）
+  #   kimi-*    → Kimi Code 兼容 API（消耗 Kimi 额度）
+  #
+  # Claude 模型参考：
+  #   claude-opus-4-6, claude-sonnet-4-6, claude-haiku-4-5-20251001
+  #
+  # Kimi 模型参考（通过 https://api.kimi.com/coding/ 调用）：
+  #   kimi-for-coding          ← 默认推荐，综合能力最强
+  #   kimi-k2.6, kimi-k2.5     ← 特定版本（如文档支持）
+  #
+  # 推荐分层策略（省 Claude 额度）：
+  #   proposer: claude-opus-4-6      ← 核心报告，保留 Claude
+  #   voter:    kimi-for-coding      ← 审阅切 Kimi
+  #   summary:  kimi-for-coding      ← 摘要轻量任务用 Kimi
+  #
+  # 也可以全切 Kimi：
+  #   proposer: kimi-for-coding
+  #   voter:    kimi-for-coding
+  #   summary:  kimi-for-coding
+
+  proposer: "kimi-for-coding"
+  voter: "kimi-for-coding"
+  summary: "kimi-for-coding"
 
 output:
   reports_dir: "data/narrative/reports"
