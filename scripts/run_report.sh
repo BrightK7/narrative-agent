@@ -92,7 +92,7 @@ fi
 # ---------------------------------------------------------------------------
 # 5. 推送报告到 GitHub
 # ---------------------------------------------------------------------------
-git add data/narrative/reports/ data/sentinel_input.json 2>/dev/null || true
+git add data/narrative/reports/ data/narrative/summaries/ data/sentinel_input.json 2>/dev/null || true
 git diff --cached --quiet || git commit -m "chore: narrative report $(date +%Y%m%d)"
 git push origin main
 
