@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.brightk7.narrative-agent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/bo/personal-projects/narrative-agent/scripts/run_report.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/bo/personal-projects/narrative-agent</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>8</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- 系统启动 / plist 加载时兜底跑一次 -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- 如果任务运行超过 30 分钟，强制终止，防止挂死 -->
+    <key>Timeout</key>
+    <integer>1800</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/bo/Library/Logs/narrative-agent.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/bo/Library/Logs/narrative-agent.error.log</string>
+
+    <!-- 环境变量兜底 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/bo</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>
