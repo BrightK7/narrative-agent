@@ -342,7 +342,7 @@ def generate_summary(
     summaries_dir: Path,
 ) -> dict:
     prompt = _SUMMARIZE_PROMPT.format(report=report[:6000])
-    text, sid = _call_llm(prompt, model=summary_model, timeout=120)
+    text, sid = _call_llm(prompt, model=summary_model, timeout=300)
     if sid:
         cleanup_sessions([sid])
 
