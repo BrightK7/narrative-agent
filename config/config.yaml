@@ -24,9 +24,9 @@ models:
   #   voter:    kimi-for-coding
   #   summary:  kimi-for-coding
 
-  proposer: "kimi-for-coding"
-  voter: "kimi-for-coding"
-  summary: "kimi-for-coding"
+  proposer: "kimi-k2.6"
+  voter: "kimi-k2.6"
+  summary: "kimi-k2.6"
 
 output:
   reports_dir: "data/narrative/reports"

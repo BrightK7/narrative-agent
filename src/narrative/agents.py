@@ -246,7 +246,7 @@ def _run_single_critique(
         f"文章摘要（供参考）：\n{articles_summary}\n\n"
         f"{_VOTER_CRITIQUE_TASK}"
     )
-    text, sid = _call_llm(prompt, model=voter_model, timeout=240)
+    text, sid = _call_llm(prompt, model=voter_model, timeout=600)
     return CritiqueResult(voter_id=voter_id, persona=persona_name,
                           critique=text, session_id=sid)
 
