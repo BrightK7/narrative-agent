@@ -61,7 +61,18 @@ else
 fi
 
 echo "[$(date '+%Y-%m-%d %H:%M')] 开始生成叙事报告..."
+set +e
 "$PYTHON" -m scripts.generate_report --config "$CONFIG" $MAX_ARGS
+REPORT_RC=$?
+set -e
+
+if [ "$REPORT_RC" -eq 2 ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M')] 没有新文章，跳过本次运行。"
+    exit 0
+elif [ "$REPORT_RC" -ne 0 ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M')] 报告生成失败 (exit code: $REPORT_RC)。"
+    exit $REPORT_RC
+fi
 
 # ---------------------------------------------------------------------------
 # 4. 更新 sentinel_input.json

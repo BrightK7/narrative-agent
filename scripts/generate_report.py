@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -112,7 +113,7 @@ def main() -> None:
 
     if not articles:
         print("没有新文章，本次跳过。")
-        return
+        sys.exit(2)
 
     print(f"发现 {len(articles)} 篇新文章，开始 3 轮审议...\n")
     positions      = _load_positions(positions_file)
