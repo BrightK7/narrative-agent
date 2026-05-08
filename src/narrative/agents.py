@@ -202,7 +202,7 @@ def run_proposer_draft(
         positions=positions_text,
         articles=articles_text,
     )
-    return _call_llm(prompt, model=proposer_model, timeout=300)
+    return _call_llm(prompt, model=proposer_model, timeout=1200)
 
 
 # ---------------------------------------------------------------------------
@@ -317,7 +317,7 @@ def run_proposer_revision(
         draft=draft,
         critiques_block=critique_sections,
     )
-    return _call_llm(prompt, model=proposer_model, timeout=300)
+    return _call_llm(prompt, model=proposer_model, timeout=1200)
 
 
 # ---------------------------------------------------------------------------
