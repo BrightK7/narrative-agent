@@ -60,6 +60,15 @@ def fetch_new_articles(
     """
     seen = _load_seen(seen_path)
     feed = feedparser.parse(feed_url)
+
+    if not feed.entries:
+        status = getattr(feed, "status", "N/A")
+        bozo_exc = getattr(feed, "bozo_exception", None)
+        raise RuntimeError(
+            f"RSS feed 抓取失败或返回空（{feed_url}）："
+            f"status={status}, bozo={feed.bozo}, exc={bozo_exc}"
+        )
+
     articles: list[Article] = []
     new_ids: set[str] = set()
 
