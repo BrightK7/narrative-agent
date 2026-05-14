@@ -246,7 +246,7 @@ def _run_single_critique(
         f"文章摘要（供参考）：\n{articles_summary}\n\n"
         f"{_VOTER_CRITIQUE_TASK}"
     )
-    text, sid = _call_llm(prompt, model=voter_model, timeout=600)
+    text, sid = _call_llm(prompt, model=voter_model, timeout=900)
     return CritiqueResult(voter_id=voter_id, persona=persona_name,
                           critique=text, session_id=sid)
 
@@ -266,11 +266,19 @@ def run_voters_critique(
             executor.submit(
                 _run_single_critique,
                 i + 1, name, desc, draft, articles_summary, voter_model,
-            ): i
+            ): (i + 1, name)
             for i, (name, desc) in enumerate(voter_personas)
         }
         for future in as_completed(futures):
-            results.append(future.result())
+            voter_id, persona_name = futures[future]
+            try:
+                results.append(future.result())
+            except Exception as e:
+                print(f"  [警告] Voter {voter_id} [{persona_name}] 失败，跳过: {e}")
+
+    if not results:
+        raise RuntimeError("所有 Voter 都失败了，无法继续 Round 3")
+
     results.sort(key=lambda r: r.voter_id)
     return results
 
